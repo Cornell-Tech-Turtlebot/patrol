@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="patrol" type="bounce.py" name="bounce" output="screen">
+    </node>
+</launch>

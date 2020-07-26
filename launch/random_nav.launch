@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="patrol" type="random_nav.py" name="random_nav" output="screen">
+    </node>
+</launch>

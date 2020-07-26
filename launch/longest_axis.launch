@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="patrol" type="longest_axis.py" name="longest_axis" output="screen">
+    </node>
+</launch>

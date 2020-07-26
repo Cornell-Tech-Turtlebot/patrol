@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="patrol" type="read_laser.py" name="read_laser" output="screen">
+    </node>
+</launch>
