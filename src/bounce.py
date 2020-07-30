@@ -20,6 +20,8 @@ class Bouncer():
 
     self.fov = 88
 
+    self.tolerance = 10
+
     self.BURGER_MAX_LIN_VEL = 0.20 #0.22
     self.BURGER_MAX_ANG_VEL = 0.92 #2.84
 
@@ -107,11 +109,11 @@ class Bouncer():
       else:
         break
    
-    r = rospy.Rate(10)
+    r = rospy.Rate(100)
     while True:
       #print("Heading: %d" % self.heading)
       #print("Target: %d" % self.target_angle)
-      if (self.target_angle-10<=self.heading<=self.target_angle+10):
+      if (self.target_angle-self.tolerance<=self.heading<=self.target_angle+self.tolerance):
         self.too_close = False
         return
       self.target_angular_vel = self.BURGER_MAX_ANG_VEL
@@ -146,7 +148,7 @@ if __name__=="__main__":
 
     bounce = Bouncer()
 
-    r = rospy.Rate(10) # 10hz
+    r = rospy.Rate(100) # 10hz
     #try:
     while True:
         if(bounce.too_close):
