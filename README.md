@@ -6,11 +6,16 @@ A package that contains nodes for various automated patrol algorithms on a robot
 
 ### FixedTurn
 
+![FixedTurn Patrol](https://github.com/Cornell-Tech-Turtlebot/patrol/blob/master/images/fixedturn.gif)
+
 FixedTurn is a rospy node that implements a deterministic patrol algorithm. The robot will move in a straight line until the LIDAR detects an obstacle in front of it within a certain threshold. Then, the robot will stop and turn clockwise until the space in front of it is free, and then continue moving in a straight line.
 
 ### Bounce
 
+![Bounce Patrol](https://github.com/Cornell-Tech-Turtlebot/patrol/blob/master/images/bounce.gif)
+
 Bounce is a rospy node that implements a random sampling patrol algorithm. The robot will move in a straight line until the LIDAR detects an obstacle in front of it within a certain threshold. Then, the robot will stop, a new angle will be randomly sampled, the robot will turn to that angle, and then continue moving in a straight line.
+
 
 ### RandomNav
 
