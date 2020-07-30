@@ -18,9 +18,9 @@ class Bouncer():
     self.too_close = False
     self.range_min = 0
 
-    self.tolerance = 5
+    self.tolerance = 10
 
-    self.fov = 118
+    self.fov = 88
 
     self.BURGER_MAX_LIN_VEL = 0.20 #0.22
     self.BURGER_MAX_ANG_VEL = 0.92 #2.84
@@ -48,7 +48,7 @@ class Bouncer():
 
     self.sub1 = rospy.Subscriber('/scan', LaserScan, self.tooClose)
     self.sub2 = rospy.Subscriber('/odom', Odometry, self.getOrientation)
-    self.pub = rospy.Publisher('cmd_vel', Twist, queue_size=100)
+    self.pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
 
     rospy.on_shutdown(self.stopOnShutdown)
 
@@ -102,18 +102,18 @@ class Bouncer():
     return view_bool
   
   def Turn(self):
-    self.twist.linear.x = 0.0
-    self.twist.angular.z = 0.0
-    self.pub.publish(self.twist)
-
     sorted_angles = np.flip(np.argsort(self.lidar_ranges))
     for angle in sorted_angles:
       self.target_angle = angle
       if (self.isTargetSafe()):
         break
 
-    #print(self.target_angle)
-    print(self.lidar_ranges[self.target_angle])
+    # while True:
+    #   self.target_angle = np.random.randint(0,359)
+    #   if (self.isTargetSafe()):
+    #     self.target_angle = np.random.randint(0,359)
+    #   else:
+    #     break
    
     r = rospy.Rate(100)
     while True:
@@ -121,10 +121,6 @@ class Bouncer():
       #print("Target: %d" % self.target_angle)
       if (self.target_angle-self.tolerance<=self.heading<=self.target_angle+self.tolerance):
         self.too_close = False
-        self.twist.angular.z = 0.0
-        self.pub.publish(self.twist)
-        print(self.target_angle)
-        print(self.heading)
         return
 
       self.target_angular_vel = self.BURGER_MAX_ANG_VEL
@@ -138,18 +134,6 @@ class Bouncer():
 
       self.pub.publish(self.twist)
       r.sleep()
-
-  def Stop(self):
-    start = rospy.get_time()
-    r = rospy.Rate(100)
-    while True:
-      current = rospy.get_time()
-      self.twist.angular.z = 0.0
-      self.twist.linear.x = 0.0
-      self.pub.publish(self.twist)
-      r.sleep()
-      if((current-start)>5):
-        return
   
   def goStraight(self):
     print("Moving...")
@@ -170,12 +154,12 @@ if __name__=="__main__":
 
     bounce = Bouncer()
 
-    r = rospy.Rate(100) # 10hz
+    r = rospy.Rate(100) # 100hz
     #try:
     while True:
         if(bounce.too_close):
           bounce.Turn()
-          bounce.Stop()
+
         bounce.goStraight()
             
         r.sleep()
