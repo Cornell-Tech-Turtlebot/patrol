@@ -18,6 +18,7 @@ class Nav():
 
   def __init__(self):
     ''' Initialization which starts node, and begins subscribing to the map. '''
+    self.buffer = 10
     rospy.init_node('random_nav', anonymous=True)
     rospy.loginfo("Initialized Bouncer Node")
 
@@ -30,12 +31,12 @@ class Nav():
 
   def check_goal(self,x_start,x_end,y_start,y_end,grid):
     ''' Generate random points, and find out if they are safe '''
-    goal = (np.random.randint(x_start+1,x_end-1),np.random.randint(y_start+1,y_end-1))
+    goal = (np.random.randint(x_start+self.buffer,x_end-self.buffer),np.random.randint(y_start+self.buffer,y_end-self.buffer))
     while True:
       goal = (np.random.randint(x_start,x_end),np.random.randint(y_start,y_end))
-      safe = (grid[goal[0],goal[1]]==0)  and (grid[goal[0]+1,goal[1]]==0) and (grid[goal[0],goal[1]+1]==0) \
-        and (grid[goal[0]+1,goal[1]+1]==0) and (grid[goal[0]-1,goal[1]]==0) and (grid[goal[0],goal[1]-1]==0) \
-          and (grid[goal[0]-1,goal[1]-1]==0)
+      safe = (grid[goal[0],goal[1]]==0)  and (grid[goal[0]+self.buffer,goal[1]]==0) and (grid[goal[0],goal[1]+self.buffer]==0) \
+        and (grid[goal[0]+self.buffer,goal[1]+self.buffer]==0) and (grid[goal[0]-self.buffer,goal[1]]==0) and (grid[goal[0],goal[1]-self.buffer]==0) \
+          and (grid[goal[0]-self.buffer,goal[1]-self.buffer]==0)
       if (safe):
         break
     return goal
