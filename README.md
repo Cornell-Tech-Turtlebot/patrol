@@ -19,6 +19,8 @@ Bounce is a rospy node that implements a random sampling patrol algorithm. The r
 
 ### RandomNav
 
+![RandomNav Patrol](https://github.com/Cornell-Tech-Turtlebot/patrol/blob/master/images/randomnav.gif)
+
 RandomNav is a rospy node that implements a stratified rejection sampling patrol algorithm, but makes use of the move_base and actionlib packages. Given an occupancy grid map of the environment, the algorithm divides the map into 4 quadrant, and randomly samples a cell from each quadrant. If the sampled point is an occupied cell, it is rejected and another point is sampled. When there is a free cell sampled in each quadrant, the cells' coordinates are transformed into the world coordinate frame and sent as nav goals to move_base. Once all 4 goals have been visited, the algorithm repeats.
 
 
