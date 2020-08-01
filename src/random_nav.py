@@ -18,7 +18,15 @@ class Nav():
 
   def __init__(self):
     ''' Initialization which starts node, and begins subscribing to the map. '''
+
+    self.height = 0
+    self.width = 0
+    self.origin = (0,0)
+    self.resolution = 0
+    self.occ_grid = []
+
     self.buffer = 10
+    self.goal_list = []
     rospy.init_node('random_nav', anonymous=True)
     rospy.loginfo("Initialized Bouncer Node")
 
@@ -27,7 +35,6 @@ class Nav():
     rospy.on_shutdown(self.stopOnShutdown)
 
     rospy.spin()
-
 
   def check_goal(self,x_start,x_end,y_start,y_end,grid):
     ''' Generate random points, and find out if they are safe '''
@@ -43,23 +50,24 @@ class Nav():
 
   def get_goals(self,msg):
     ''' Get occupancy grid, find safe points in each quadrant, and send them as goals. '''
-    height = msg.info.height
-    width = msg.info.width
-    origin = (msg.info.origin.position.x,msg.info.origin.position.y)
-    resolution = msg.info.resolution
-    occ_grid = np.array(msg.data).reshape(height,width).T
+    self.height = msg.info.height
+    self.width = msg.info.width
+    self.origin = (msg.info.origin.position.x,msg.info.origin.position.y)
+    self.resolution = msg.info.resolution
+    self.occ_grid = np.array(msg.data).reshape(self.height,self.width).T
 
     while True:
+      rospy.loginfo("Sampling new goals...")
+      q1_goal = self.check_goal(0,self.width//2,0,self.height//2,self.occ_grid)
+      q2_goal = self.check_goal(self.width//2,self.width,0,self.height//2,self.occ_grid)
+      q3_goal = self.check_goal(0,self.width//2,self.height//2,self.height,self.occ_grid)
+      q4_goal = self.check_goal(self.width//2,self.width,self.height//2,self.height,self.occ_grid)
+
+      self.goal_list = [q1_goal,q2_goal,q3_goal,q4_goal]
+
       rospy.loginfo("Sending new goals...")
-      q1_goal = self.check_goal(0,width//2,0,height//2,occ_grid)
-      q2_goal = self.check_goal(width//2,width,0,height//2,occ_grid)
-      q3_goal = self.check_goal(0,width//2,height//2,height,occ_grid)
-      q4_goal = self.check_goal(width//2,width,height//2,height,occ_grid)
-
-      goal_list = [q1_goal,q2_goal,q3_goal,q4_goal]
-
-      for goal in goal_list:
-        self.movebase_client(goal[0],goal[1],origin,resolution)
+      for goal in self.goal_list:
+        self.movebase_client(goal[0],goal[1],self.origin,self.resolution)
       rospy.loginfo("Goals sent.")
 
 
