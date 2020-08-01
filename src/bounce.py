@@ -71,10 +71,11 @@ class Bouncer():
     self.heading = int(euler_from_quaternion(orientation_q_list)[2] * (180/np.pi) + 180)
 
   def tooClose(self,msg):
-    closest_front = min(msg.ranges[0:self.fov/2] + msg.ranges[300:300+self.fov/2])
     self.range_min = msg.range_min
     self.lidar_ranges = np.array(msg.ranges)
-    if (msg.range_min<closest_front<self.min_distance):
+    view = np.array(self.lidar_ranges[0:self.fov/2] + self.lidar_ranges[(359-self.fov/2):359])
+    closest_front = np.min(view[self.range_min<view])
+    if (closest_front<self.min_distance):
         print("Too Close!")
         self.too_close = True
 
@@ -83,6 +84,7 @@ class Bouncer():
 
     rospy.loginfo("System is shutting down. Stopping robot...")
     self.twist.linear.x = 0
+    self.twist.angular.z = 0
     self.pub.publish(self.twist)
   
   def isTargetSafe(self):
@@ -148,15 +150,15 @@ if __name__=="__main__":
 
     bounce = Bouncer()
 
-    r = rospy.Rate(100) # 10hz
+    r = rospy.Rate(100) # 100hz
     #try:
-    while True:
-        if(bounce.too_close):
-          bounce.randomTurn()
+    while not rospy.is_shutdown():
+      if (bounce.too_close):
+        bounce.randomTurn()
 
-        bounce.goStraight()
+      bounce.goStraight()
             
-        r.sleep()
+      r.sleep()
     #except:
         #print("Error")
 
