@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+#TODO: Check robot model
 
 import rospy
 from sensor_msgs.msg import LaserScan

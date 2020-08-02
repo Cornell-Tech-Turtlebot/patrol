@@ -1,11 +1,9 @@
 #! /usr/bin/env python
+#TODO: Check robot model
 
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
-from nav_msgs.msg import Odometry
-
-from tf.transformations import euler_from_quaternion
 
 import numpy as np
 
