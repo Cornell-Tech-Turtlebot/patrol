@@ -15,13 +15,13 @@ class Bouncer():
 
   def __init__(self):
     self.min_distance = 0.5
-    self.target_min_distance = 1.0
+    self.target_min_distance = 0.5
     self.too_close = False
     self.range_min = 0
 
     self.fov = 88
 
-    self.tolerance = 10
+    self.tolerance = 5
 
     self.BURGER_MAX_LIN_VEL = 0.20 #0.22
     self.BURGER_MAX_ANG_VEL = 0.92 #2.84
@@ -117,6 +117,8 @@ class Bouncer():
       #print("Heading: %d" % self.heading)
       #print("Target: %d" % self.target_angle)
       if (self.target_angle-self.tolerance<=self.heading<=self.target_angle+self.tolerance):
+        self.twist.angular.x = 0.0; self.twist.angular.y = 0.0; self.twist.angular.z = 0.0
+        self.pub.publish(self.twist)
         self.too_close = False
         return
       self.target_angular_vel = self.BURGER_MAX_ANG_VEL
