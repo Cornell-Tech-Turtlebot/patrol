@@ -70,17 +70,17 @@ class Nav():
 
   def send_goals(self):
     while not rospy.is_shutdown():
-      #rospy.loginfo("Sampling new goals...")
       if (not self.goal_list and (self.occ_grid.size > 0)):
+      	rospy.loginfo("Sampling new goals...")
         q1_goal = self.check_goal(0,self.width//2,0,self.height//2,self.occ_grid)
         q2_goal = self.check_goal(self.width//2,self.width,0,self.height//2,self.occ_grid)
         q3_goal = self.check_goal(0,self.width//2,self.height//2,self.height,self.occ_grid)
         q4_goal = self.check_goal(self.width//2,self.width,self.height//2,self.height,self.occ_grid)
         self.goal_list = [q1_goal,q2_goal,q3_goal,q4_goal]
       
-      #rospy.loginfo("Sending new goals...")
       while self.goal_list:
         if (self.is_current_state):
+	  print('GOALS: ' + str(len(self.goal_list)))
           goal = self.goal_list.pop()
           rospy.loginfo("Sending goal...")
           self.movebase_client(goal[0],goal[1],self.origin,self.resolution)
