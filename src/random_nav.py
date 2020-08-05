@@ -23,18 +23,18 @@ class Nav():
     self.width = 0
     self.origin = (0,0)
     self.resolution = 0
-    self.occ_grid = []
+    self.occ_grid = np.array([])
 
     self.buffer = 10
     self.goal_list = []
     rospy.init_node('random_nav', anonymous=True)
     rospy.loginfo("Initialized Bouncer Node")
 
-    rospy.Subscriber("/map", OccupancyGrid, self.get_goals)
+    rospy.Subscriber("/map", OccupancyGrid, self.get_map)
 
     rospy.on_shutdown(self.stopOnShutdown)
 
-    rospy.spin()
+    #rospy.spin()
 
   def check_goal(self,x_start,x_end,y_start,y_end,grid):
     ''' Generate random points, and find out if they are safe '''
@@ -48,27 +48,31 @@ class Nav():
         break
     return goal
 
-  def get_goals(self,msg):
-    ''' Get occupancy grid, find safe points in each quadrant, and send them as goals. '''
+  def get_map(self,msg):
+    ''' Get occupancy grid and map params '''
+    rospy.loginfo("Getting map...")
     self.height = msg.info.height
     self.width = msg.info.width
     self.origin = (msg.info.origin.position.x,msg.info.origin.position.y)
     self.resolution = msg.info.resolution
     self.occ_grid = np.array(msg.data).reshape(self.height,self.width).T
+    rospy.loginfo("Got map.")
 
-    while True:
-      rospy.loginfo("Sampling new goals...")
-      q1_goal = self.check_goal(0,self.width//2,0,self.height//2,self.occ_grid)
-      q2_goal = self.check_goal(self.width//2,self.width,0,self.height//2,self.occ_grid)
-      q3_goal = self.check_goal(0,self.width//2,self.height//2,self.height,self.occ_grid)
-      q4_goal = self.check_goal(self.width//2,self.width,self.height//2,self.height,self.occ_grid)
-
-      self.goal_list = [q1_goal,q2_goal,q3_goal,q4_goal]
-
-      rospy.loginfo("Sending new goals...")
-      for goal in self.goal_list:
+  def send_goals(self):
+    while not rospy.is_shutdown():
+      #rospy.loginfo("Sampling new goals...")
+      if (not self.goal_list and (self.occ_grid.size > 0)):
+        q1_goal = self.check_goal(0,self.width//2,0,self.height//2,self.occ_grid)
+        q2_goal = self.check_goal(self.width//2,self.width,0,self.height//2,self.occ_grid)
+        q3_goal = self.check_goal(0,self.width//2,self.height//2,self.height,self.occ_grid)
+        q4_goal = self.check_goal(self.width//2,self.width,self.height//2,self.height,self.occ_grid)
+        self.goal_list = [q1_goal,q2_goal,q3_goal,q4_goal]
+      
+      #rospy.loginfo("Sending new goals...")
+      while self.goal_list:
+        goal = self.goal_list.pop()
+        rospy.loginfo("Sending goal...")
         self.movebase_client(goal[0],goal[1],self.origin,self.resolution)
-      rospy.loginfo("Goals sent.")
 
 
   def movebase_client(self,goal_x,goal_y,origin,resolution):
@@ -89,19 +93,21 @@ class Nav():
           rospy.logerr("Action server not available!")
           rospy.signal_shutdown("Action server not available!")
       else:
+          rospy.loginfo("Goal sent.")
           return client.get_result()
 
   def stopOnShutdown(self):
     ''' Shutdown Handler '''
 
     rospy.loginfo("Random Nav is shutting down...")
-    # twist = Twist()
-    # pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
-    # twist.linear.x = 0
-    # twist.angular.x = 0
-    # pub.publish(twist)
+    twist = Twist()
+    pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
+    twist.linear.x = 0
+    twist.angular.x = 0
+    pub.publish(twist)
 
 
 if __name__=="__main__":
-    Nav()
+    patrol = Nav()
+    patrol.send_goals()
 
