@@ -2,6 +2,8 @@
 
 A package that contains nodes for various automated patrol algorithms on a robot running ROS. They have been designed for the Turtlebot3 but can easily be adapted to work with other robots as long as they are have LIDAR scans and are running ROS.
 
+[![Autonomous Patrol Video!](http://img.youtube.com/vi/lCQRPiYSwbE/0.jpg)](https://www.youtube.com/watch?v=lCQRPiYSwbE)
+
 ## Nodes
 
 ### FixedTurn
